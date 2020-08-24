@@ -3,6 +3,7 @@ import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {HelloWorldBean} from "./data/welcome-data.service";
 import {map} from "rxjs/operators";
 import {API_URL} from "../app.constants";
+import {pipe} from "rxjs";
 
 export const TOKEN ='token'
 export const AUTHENTICATED_USER = 'authenticatedUser'
@@ -13,6 +14,21 @@ export const AUTHENTICATED_USER = 'authenticatedUser'
 export class BasicAuthenticationService {
 
   constructor(private http: HttpClient) { }
+
+  executeJWTAuthenticationService(username, password){
+    return this.http.post<any>(`${API_URL}/authenticate`,{
+      username,
+      password
+    }).pipe(
+      map(
+        data => {
+          sessionStorage.setItem(AUTHENTICATED_USER, username);
+          sessionStorage.setItem(TOKEN, `Bearer ${data.token}`);
+          return data;
+        }
+      )
+    );
+  }
 
   executeBasicAuthenticationService(username, password){
     let basicAuthHeaderString = 'Basic ' + window.btoa(username + ":" + password);
